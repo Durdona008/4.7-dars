@@ -161,3 +161,75 @@ app.listen(PORT, () => {
     console.log("server ishladi: " + PORT);
 })
 
+/////////////////DRINKS///////////////////////////
+//GET
+app.get("/drinks", (req, res) => {
+    const drinks = read_file("drinks.json")
+    res.status(200).send(drinks)
+})
+
+
+///GET ONE
+app.get("/get_one_drinks/:id", (req, res) => {
+    const { id } = req.params
+    const drinks = read_file("drinks.json")
+    const foundedDrinks = drinks.find((item) => item.id === id)
+    if (!foundedDrinks) {
+        return res.status(404).json({ msg: "drinks not found" })
+    }
+    res.status(200).json(foundedDrinks)
+})
+
+//POST
+app.post("/creat_drink", (req, res) => {
+    const { name, desc, price, imgUrl } = req.body
+    const drinks = read_file("drinks.json")
+    drinks.push({
+        id: v4(),
+        name,
+        desc,
+        price,
+        imgUrl
+    })
+    write_file("drinks.json", drinks)
+    res.status(201).json({ msg: "added new drink" })
+})
+
+//PUT
+app.put("/update_drinks/:id", (req, res) => {
+    const { id } = req.params
+    const { name, desc, price, imgUrl } = req.body
+    const drinks = read_file("drinks.json")
+    const foundedDrinks = drinks.find((item) => item.id === id)
+    if (!foundedDrinks) {
+        return res.status(404).json({ msg: "drinks not found" })
+    }
+    drinks.forEach((item) => {
+        if (item.id === id) {
+            item.name = name ? name : item.name
+            item.desc = desc ? desc : item.desc
+            item.price = price ? price : item.price
+            item.imgUrl = imgUrl ? imgUrl : item.imgUrl
+        }
+    })
+    write_file("drinks.json", drinks)
+    res.status(201).json({msg:"updated"})
+})
+
+
+//DELETE
+app.delete("/delete/:id", (req, res)=>{
+    const { id } = req.params
+    const drinks = read_file("drinks.json")
+    const foundedDrinks = drinks.find((item) => item.id === id)
+    if (!foundedDrinks) {
+        return res.status(404).json({ msg: "drinks not found" })
+    }
+    drinks.forEach((item, idx) => {
+        if (item.id === id) {
+            drinks.splice(idx, 1)
+        }
+    })
+    write_file("drinks.json", drinks)
+    res.status(201).json({msg:"deleted"})
+})
